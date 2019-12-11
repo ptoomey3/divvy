@@ -128,10 +128,13 @@ module Divvy
       client = UNIXSocket.new(@socket)
       r, w, e = IO.select([client], nil, [client], nil)
       return if !e.empty?
-
-      if data = client.read(16384)
-        Marshal.load(data)
+      
+      data = ""
+      while chunk = client.read(16384)
+        data << chunk
       end
+        
+      Marshsal.load(data) if data
     rescue Errno::ECONNRESET => boom
       # server went away between getting in the backlog and reading actual data
       # we treat this as if no data was read
